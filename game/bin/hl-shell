@@ -1,0 +1,10 @@
+#!/bin/sh
+# The shell in every game pane. The game points XDG_CONFIG_HOME at its sandbox so
+# its Herdr server stays separate from yours; put yours back so git, nvim & co.
+# find their config as usual, then start your normal shell.
+if [ -n "$HERDLING_ORIG_XDG" ]; then export XDG_CONFIG_HOME="$HERDLING_ORIG_XDG"; else unset XDG_CONFIG_HOME; fi
+export SHELL="${HERDLING_SHELL:-/bin/sh}"
+case "$(uname)" in
+  Darwin) exec "$SHELL" -l "$@" ;;   # like Herdr's shell_mode "auto": login shells on macOS
+  *) exec "$SHELL" "$@" ;;
+esac

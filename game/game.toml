@@ -1,0 +1,25 @@
+# My Herdr config: a practice copy, made in herdling.
+# (Inside the game, Herdr reads this file because HERDR_CONFIG_PATH points here.)
+# Lines starting with # are comments. `herdr --default-config` prints every option.
+# After editing: save, then reload with prefix+shift+r.
+
+# Skip Herdr's first-run setup screen.
+onboarding = false
+
+[theme]
+# catppuccin, tokyo-night, dracula, nord, gruvbox, one-dark, solarized, kanagawa,
+# rose-pine, vesper, terminal (use your terminal's own colours)…
+# name = "catppuccin"
+
+[keys]
+# prefix = "ctrl+b"
+# Bind an action:   action_name = "prefix+key"     (see prefix+? for action names)
+
+[ui]
+# Status entries at the right of the tab bar: zoom, hostname, datetime, text, command.
+# tab_bar_right = []
+
+# Pop up a little in-app notice when a background agent finishes or needs you.
+[ui.toast]
+delivery = "herdr"
+delay_seconds = 0

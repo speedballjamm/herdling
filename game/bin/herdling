@@ -1,0 +1,4 @@
+#!/bin/sh
+# `herdling hint`, `herdling skip`, … typed inside the game.
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+PYTHONPATH="$ROOT" exec "${HERDLING_PYTHON:-python3}" -m game.cli "$@"

@@ -1,0 +1,5 @@
+#!/bin/sh
+# Run one of the game's little pane programs (a label, a log to dig through…), then a normal shell.
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+PYTHONPATH="$ROOT" "${HERDLING_PYTHON:-python3}" -m game.panes "$@"
+exec "$ROOT/game/bin/hl-shell"

@@ -1,0 +1,4 @@
+#!/bin/sh
+# Run one of the game's pane programs in the current shell.
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+PYTHONPATH="$ROOT" exec "${HERDLING_PYTHON:-python3}" -m game.panes "$@"
