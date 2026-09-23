@@ -24,6 +24,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: HERDLING_DIR="$RUNNER_TEMP/share/herdling" HERDLING_BIN="$RUNNER_TEMP/bin" sh install.sh
-        env:
-          GH_TOKEN: ${{ github.token }}
       - run: '"$RUNNER_TEMP/bin/herdling" --version'
