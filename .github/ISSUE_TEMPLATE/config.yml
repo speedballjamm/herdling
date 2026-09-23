@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: A question about Herdr itself
+    url: https://herdr.dev/docs/
+    about: herdling is a fan project; Herdr's own docs and community are the place for Herdr questions.
