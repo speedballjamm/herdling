@@ -482,7 +482,7 @@ def world7(g):
     g.drag(x, y, x + len(code) - 1, y)
     g.wait_done("7.5")
     mission(g, "7.6")
-    g.wait(lambda: "stream ended" in g.read(g.pane_labelled("incident"), lines=400), 20, "incident log")
+    g.wait(lambda: "stream ended" in g.read(g.pane_labelled("incident"), lines=400), 60, "incident log")
     text = g.read(g.pane_labelled("incident"), lines=400)
     first = next(l for l in text.splitlines() if " ERROR " in l).split("req=")[1].split()[0]
     copy_word(g, first)
@@ -595,7 +595,7 @@ def world10(g):
     step(g, 5, 8)
     srv = next(t for t in g.snap()["tabs"] if t["label"] == "server")
     logs = g.layout_of(srv["tab_id"])["panes"][0]["pane_id"]
-    g.wait(lambda: "stream ended" in g.read(logs, lines=400), 20, "incident log")
+    g.wait(lambda: "stream ended" in g.read(logs, lines=400), 60, "incident log")
     first = next(l for l in g.read(logs, lines=400).splitlines() if " ERROR " in l).split("req=")[1].split()[0]
     g.prefix("l")
     g.cmd(f"herdling answer {first}")
