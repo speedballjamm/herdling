@@ -39,6 +39,7 @@ usage: ./herdling [command]
   cheat [--all]    print your cheat sheet (--all includes keys you haven't learned yet)
   status           your progress
   install          copy your practice config to ~/.config/herdr/config.toml (asks first, backs up)
+  about            version, credits, where to report problems
 """
 
 GAME_CMDS = {"hint", "skip", "show", "reset", "card", "again", "menu"}
@@ -117,6 +118,17 @@ def status():
     print(f"Keys due for review: {len(progress.due_keys(d))}")
 
 
+def about(short=False):
+    import game
+    if short:
+        print(f"herdling {game.__version__}")
+        return
+    print(f"herdling {game.__version__}: learn Herdr by playing it.\n"
+          f"Made by James Moult. MIT licensed. Not affiliated with Herdr, Inc.\n\n"
+          f"  Home & problems   {game.URL}/issues\n"
+          f"  Say thanks        {game.SPONSOR}")
+
+
 def edit_config():
     from . import conf
     conf.ensure()
@@ -134,6 +146,9 @@ def main(argv):
         return
     if cmd == "status":
         status()
+        return
+    if cmd in ("about", "--version", "-V", "version"):
+        about(short=cmd != "about")
         return
     if cmd == "install":
         from . import graduate

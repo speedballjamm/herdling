@@ -1,14 +1,32 @@
 # herdling
 
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 Learn [Herdr](https://herdr.dev) by playing it. No prior knowledge needed.
 
-```
-./herdling
-```
+![herdling: clearing the first missions inside a real Herdr](docs/demo.gif)
 
 You play inside a **real Herdr**, and the game watches what you do. Your mission shows in
 a bar under Herdr. Press the right keys (or click the right things) and you clear it,
 earning XP, stars and ranks. Everything you learn works in any stock Herdr.
+
+## Install
+
+```
+brew install speedballjamm/tap/herdling
+```
+
+or, without Homebrew (macOS and Linux):
+
+```
+curl -fsSL https://raw.githubusercontent.com/speedballjamm/herdling/main/install.sh | sh
+```
+
+or just clone this repo and run `./herdling`. Then:
+
+```
+herdling
+```
 
 ## Requirements
 
@@ -27,7 +45,7 @@ not from inside tmux (tmux eats `ctrl+b`).
 | **Dojo** | 60-second speed drills with combos. Beat your high score. |
 | **Review** | Spaced repetition: keys you fumbled come back sooner. |
 | **Sandbox** | Free play. The bar names every key you press and what it did. |
-| **Cheat sheet** | `./herdling cheat` (or `./herdling cheat --all`). |
+| **Cheat sheet** | `herdling cheat` (or `herdling cheat --all`). |
 
 Coming from tmux? The game notices tmux habits (`prefix+%`, `prefix+"`, `prefix+d`,
 prefix+arrows…) and tells you the Herdr key instead.
@@ -62,6 +80,16 @@ The copy-and-paste missions use your system clipboard, like Herdr itself does.
   Settings → Profiles → Keyboard → "Use Option as Meta key". In iTerm2, Profiles → Keys →
   Left Option key → Esc+.
 
+## Support
+
+herdling is free and always will be. If it saved you an afternoon of reading docs:
+
+- Star the repo, and tell a friend who's drowning in agent terminals
+- [Sponsor on GitHub](https://github.com/sponsors/speedballjamm)
+- [Report a problem](https://github.com/speedballjamm/herdling/issues): Herdr moves fast, and bug reports keep the missions working
+
+herdling is an independent fan project, not affiliated with Herdr, Inc.
+
 ## Development
 
 ```
@@ -72,3 +100,7 @@ python3 tests/test_modes.py                 # sandbox, dojo, review, hints, show
 
 The design is in [SPEC.md](SPEC.md). Missions are data in `game/worlds/`. Each step has
 a setup, a goal function over a snapshot of Herdr's state, hints, and mistake detectors.
+
+The demo GIF is recorded with `sh docs/record-demo.sh` (needs `brew install tmux asciinema agg`).
+
+MIT licensed. See [LICENSE](LICENSE).
