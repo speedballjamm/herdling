@@ -1,0 +1,11 @@
+name: Idea or new mission
+description: Something herdling should teach, or a way to make it better
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: The idea
+      description: What should herdling do or teach? If it's a Herdr feature, which one?
+    validations:
+      required: true

@@ -1,0 +1,49 @@
+# Plays every mission against the latest Herdr, weekly and on demand (Actions → herdr-compat →
+# Run workflow, e.g. right after a Herdr release). Opens an issue when something breaks.
+name: herdr-compat
+on:
+  schedule:
+    - cron: "0 6 * * 1"   # Mondays 06:00 UTC
+  workflow_dispatch:
+  pull_request:
+    paths: [.github/workflows/herdr-compat.yml, tests/**]
+permissions:
+  contents: read
+  issues: write
+jobs:
+  missions:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            worlds: ""                       # all of them
+          - os: ubuntu-latest
+            worlds: "0 1 2 3 4 5 6 8 9 10"   # world 7's tests read the clipboard with pbpaste
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install tmux
+        run: |
+          if command -v tmux >/dev/null; then exit 0; fi
+          if [ "$RUNNER_OS" = macOS ]; then brew install tmux; else sudo apt-get install -y tmux; fi
+      - name: Install the latest Herdr
+        run: |
+          curl -fsSL https://herdr.dev/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - run: herdr --version | tee herdr-version.txt
+      - name: Missions
+        run: python3 tests/test_missions.py ${{ matrix.worlds }}
+      - name: Modes
+        run: python3 tests/test_modes.py
+      - name: Open an issue
+        if: failure() && github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="herdr-compat failing on ${{ runner.os }} with $(cat herdr-version.txt 2>/dev/null || echo 'latest Herdr')"
+          if gh issue list --state open --search "in:title \"$title\"" --json number --jq '.[0].number' | grep -q .; then
+            exit 0
+          fi
+          gh issue create --title "$title" --body "The weekly mission run failed: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"

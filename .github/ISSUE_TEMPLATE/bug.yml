@@ -1,0 +1,54 @@
+name: Something didn't work
+description: A mission didn't register, the game crashed, install failed…
+labels: [bug]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of problem?
+      options:
+        - I did the right thing but the mission didn't clear
+        - The game crashed or froze
+        - Install or startup failed
+        - Something looks wrong on screen
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what you saw. A screenshot helps a lot.
+    validations:
+      required: true
+  - type: input
+    id: mission
+    attributes:
+      label: Mission
+      description: The number in the bar, e.g. 4.2 (or Dojo / Review / Sandbox)
+  - type: textarea
+    id: versions
+    attributes:
+      label: Versions
+      description: Paste the output of `herdling --version; herdr --version; uname -sm`
+      render: text
+    validations:
+      required: true
+  - type: input
+    id: terminal
+    attributes:
+      label: Terminal app
+      description: e.g. Terminal.app, iTerm2, Ghostty, WezTerm, kitty, Alacritty
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: How did you install herdling?
+      options: [Homebrew, curl install.sh, git clone]
+  - type: textarea
+    id: log
+    attributes:
+      label: Engine log (optional)
+      description: The last ~50 lines of `~/.herdling/engine.log`
+      render: text
