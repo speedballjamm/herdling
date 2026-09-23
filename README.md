@@ -5,7 +5,7 @@
 
 Learn [Herdr](https://herdr.dev) by playing it. No prior knowledge needed.
 
-![herdling: clearing the first missions inside a real Herdr](docs/demo.gif)
+![herdling: catching a tmux habit, herding four AI agents in a boss fight, and a Dojo speed drill, all inside a real Herdr](docs/demo.gif)
 
 You play inside a **real Herdr**, and the game watches what you do. Your mission shows in
 a bar under Herdr. Press the right keys (or click the right things) and you clear it,
@@ -102,6 +102,7 @@ python3 tests/test_modes.py                 # sandbox, dojo, review, hints, show
 The design is in [SPEC.md](SPEC.md). Missions are data in `game/worlds/`. Each step has
 a setup, a goal function over a snapshot of Herdr's state, hints, and mistake detectors.
 
-The demo GIF is recorded with `sh docs/record-demo.sh` (needs `brew install tmux asciinema agg`).
+The demo (`docs/demo.gif`, `docs/demo.mp4`) and `docs/social-preview.png` are recorded from real play
+by `python3 docs/demo/record.py`. See the top of that file for what it needs.
 
 MIT licensed. See [LICENSE](LICENSE).
