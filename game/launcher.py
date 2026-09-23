@@ -1,14 +1,13 @@
-"""Title menu, starting the game's Herdr server, attaching, and the outside-Herdr practice prompt."""
+"""Title menu, starting the game's Herdr server, attaching, and your shell while detached."""
 import curses
 import logging
 import os
-import shlex
 import shutil
 import subprocess
 import sys
 import time
 
-from . import cli, conf, herdr, paths, progress
+from . import cli, conf, herdr, outside, paths, progress
 from .hud import Hud
 from .proxy import Proxy
 
@@ -29,11 +28,6 @@ DIM = "\x1b[38;5;244m"
 R = "\x1b[0m"
 
 MIN_VERSION = (0, 9, 0)
-
-# `herdr` subcommands the practice prompt runs for real (inside the sandbox)
-REAL = {"session", "status", "workspace", "tab", "pane", "agent", "api", "notification", "--version", "-V",
-        "--help", "-h", "help", "--default-config"}
-
 
 # ------------------------------------------------------------------ checks
 
@@ -110,16 +104,10 @@ def play(mode="campaign", start=None):
     hud = Hud()
     engine = Engine(h, hud, mode, start, once=os.environ.get("HERDLING_ONCE") == "1")
     engine.start_thread()
-    session = "default"
     try:
-        while True:
-            attach(engine, hud, session)
-            if engine.finished.is_set() or not h.alive():
-                break
-            what = outside_prompt(engine)
-            if what == "quit":
-                break
-            session = what
+        attach(engine, hud)
+        if not engine.finished.is_set() and h.alive():
+            outside_shell(engine, hud)
     finally:
         engine.stop.set()
         if engine.thread:
@@ -128,140 +116,31 @@ def play(mode="campaign", start=None):
     print(f"\n{G}Progress saved.{R} Run ./herdling to play again.\n")
 
 
-def outside_banner(engine):
-    rt = cli.runtime()
-    running = herdr.running_sessions()
-    print()
-    print(f"{C}──────────────────────── outside Herdr ────────────────────────{R}")
-    print(f"You've {B}detached{R}. Herdr's server is still running in the background, with every")
-    print(f"pane and program still going. Running sessions: {B}{', '.join(running) or 'none'}{R}")
-    print(f"{DIM}This is a practice prompt: it understands herdr commands like your real shell.{R}")
-    if rt.get("prompt"):
-        print(f"\n{Y}▶ {rt.get('title', '')}{R}  {rt['prompt']}")
-    if rt.get("outside"):
-        print(f"  {B}{rt['outside']}{R}")
-    else:
-        print(f"  To go back in:  {B}herdr{R}")
-    print(f"{DIM}  (type menu to quit to the title screen){R}")
-
-
-def await_engine(timeout=1.5):
-    """After a detach, give the engine a moment to move to the next step."""
+def outside_shell(engine, hud):
+    """You've detached: your own shell, until you exit it or the game ends. `herdr` in it
+    (bin/outside/herdr) asks us to attach; we borrow the terminal, then hand it back."""
+    outside.await_engine()
+    outside.banner()
+    shell = outside.Shell()
     try:
-        seen = os.stat(paths.RUNTIME).st_mtime
-    except OSError:
-        return
-    end = time.time() + timeout
-    while time.time() < end:
-        time.sleep(0.1)
-        try:
-            if os.stat(paths.RUNTIME).st_mtime != seen:
-                time.sleep(0.1)
+        while shell.alive():
+            if not engine.h.alive() or engine.finished.is_set():
+                shell.end()
+                print("\nThe game's Herdr server has stopped (that ends every pane in it). Back to the menu!"
+                      if not engine.h.alive() else "\nBack to the menu. Progress is saved.")
+                time.sleep(1.5)
                 return
-        except OSError:
-            return
-
-
-def session_arg(argv):
-    """The session a `herdr …` command would attach to, or None if it isn't an attach."""
-    if argv == ["herdr"]:
-        return "default"
-    if len(argv) == 3 and argv[1] == "--session":
-        return argv[2]
-    if len(argv) == 4 and argv[1:3] == ["session", "attach"]:
-        return argv[3]
-    return None
-
-
-def outside_prompt(engine):
-    """The practice shell shown while detached. Returns a session name to attach to, or 'quit'."""
-    h = engine.h
-    await_engine()
-    outside_banner(engine)
-    last_prompt = cli.runtime().get("prompt")
-    while True:
-        if not h.alive():
-            print("\nThe game's Herdr server has stopped (that ends every pane in it). Back to the menu!")
-            time.sleep(1.5)
-            return "quit"
-        if engine.finished.is_set():
-            print("\nBack to the menu. Progress is saved.")
-            time.sleep(1)
-            return "quit"
-        rt = cli.runtime()
-        if rt.get("prompt") != last_prompt:
-            last_prompt = rt.get("prompt")
-            print(f"\n{G}✔{R} {Y}▶ {rt.get('title', '')}{R}  {rt.get('prompt', '')}")
-            if rt.get("outside"):
-                print(f"  {B}{rt['outside']}{R}")
-        try:
-            line = input(f"{G}you@outside{R} $ ").strip()
-        except EOFError:
-            return "quit"
-        except KeyboardInterrupt:
-            print()
-            continue
-        if not line:
-            continue
-        try:
-            argv = shlex.split(line)
-        except ValueError:
-            print("Couldn't parse that (unbalanced quotes?).")
-            continue
-        if argv[0] in ("menu", "quit", "exit", "q"):
-            ans = input("Quit to the title menu? Progress is saved. [Y/n] ").strip().lower()
-            if ans in ("", "y", "yes"):
-                return "quit"
-            continue
-        if argv[0] == "clear":
-            print("\x1b[2J\x1b[H", end="")
-            continue
-        if argv[0] == "help":
-            print("Try: herdr · herdr session list · herdr session attach NAME · herdr session stop NAME · "
-                  "herdr status · menu")
-            continue
-        if argv[0] in ("herdling", "./herdling"):
-            sub = argv[1] if len(argv) > 1 else ""
-            if sub in ("menu", "quit"):
-                return "quit"
-            if sub in cli.GAME_CMDS:
-                cli.send({"type": "cmd", "cmd": sub})
-                print("Sent.")
-            elif sub == "answer":
-                cli.send({"type": "answer", "text": " ".join(argv[2:])})
-                print("Answer sent.")
-            elif sub == "task":
-                cli.show_task()
-            else:
-                print("In here: herdling hint · task · skip · show · answer WORD")
-            continue
-        if argv[0] != "herdr":
-            print(f"{DIM}(practice prompt) In a real shell that would run {argv[0]}. Here, only herdr "
-                  f"commands work, e.g. herdr session list, herdr. Type menu to quit.{R}")
-            continue
-        target = session_arg(argv)
-        if target is not None:
-            cli.send({"type": "outside", "argv": argv})
-            time.sleep(0.25)   # let the engine see it before the attach takes over the screen
-            return target
-        sub = argv[1] if len(argv) > 1 else ""
-        if sub == "server" or (argv[1:3] == ["session", "stop"] and (argv[3:4] or ["default"])[0] == "default"):
-            if argv[1:3] in (["server", "stop"], ["session", "stop"]):
-                ans = input(f"{Y}That stops the game's own Herdr server, closing every pane (and quitting the "
-                            f"game). Sure? [y/N]{R} ").strip().lower()
-                if ans != "y":
-                    continue
-                cli.send({"type": "outside", "argv": argv})
-                subprocess.call(argv[:1] + argv[1:], env=herdr.game_env())
+            req = shell.request()
+            if req is None:
+                time.sleep(0.1)
                 continue
-            print(f"{DIM}(practice prompt) Only `herdr server stop` is allowed here.{R}")
-            continue
-        if sub not in REAL:
-            print(f"{DIM}(practice prompt) That herdr command isn't available here. Try herdr session list, "
-                  f"herdr session attach NAME, herdr status.{R}")
-            continue
-        cli.send({"type": "outside", "argv": argv})
-        subprocess.call([herdr.herdr_bin()] + argv[1:], env=herdr.game_env())
+            outside.take_terminal()
+            attach(engine, hud, req.get("session"))
+            if engine.finished.is_set() or not engine.h.alive():
+                continue
+            shell.done(req.get("pgrp"))
+    finally:
+        shell.end()
 
 
 # ------------------------------------------------------------------ menu

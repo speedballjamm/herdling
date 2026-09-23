@@ -89,10 +89,13 @@ Herdr client instead:
    integrations. The agent missions need no Claude or Codex install.
 8. **Clipboard.** On macOS Herdr copies with `pbcopy`, so copy goals read the clipboard
    (`pbpaste`, or `wl-paste` / `xclip` / `xsel`); OSC 52 writes seen by the proxy count too.
-9. **Detach is real.** `prefix+q` ends the client; the launcher shows a practice prompt
-   that runs real `herdr` commands (session list/attach/stop/delete, status, workspace
-   list…) against the sandbox. `herdr`, `herdr --session NAME` and
-   `herdr session attach NAME` re-enter through the proxy.
+9. **Detach is real.** `prefix+q` ends the client and the launcher starts your own shell
+   (your startup files run first, then `game/shell/` puts `bin/outside` first on PATH).
+   Its `herdr` wrapper runs real `herdr` commands (session list/attach/stop/delete,
+   status, workspace list…) against the sandbox. To attach (`herdr`, `herdr --session NAME`,
+   `herdr session attach NAME`) it asks the launcher, which takes the terminal (tcsetpgrp),
+   runs the client through the proxy, and hands the terminal back on the next detach, so
+   the command returns to your shell like a real Herdr client. `game/outside.py` has both halves.
 
 ### Tech
 

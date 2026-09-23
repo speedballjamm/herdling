@@ -36,7 +36,9 @@ class Game:
         self._own_home = home is None
         self.run_outer("kill-server")
         self.real_conf = os.path.join(self.home, "real-config.toml")
-        extra = " ".join(f"{k}={v}" for k, v in (env or {}).items())
+        # a plain shell with no history file, so test runs stay out of your own shell history
+        env = {"HERDLING_SHELL": "/bin/sh", "HISTFILE": "/dev/null", **(env or {})}
+        extra = " ".join(f"{k}={v}" for k, v in env.items())
         cmd = (f"env -u TMUX -u HERDR_ENV HERDLING_HOME={self.home} HERDLING_REAL_CONF={self.real_conf} {extra} "
                f"{ROOT}/herdling {' '.join(args)}; sleep 30")
         self.run_outer("-f", "/dev/null", "new-session", "-d", "-x", str(cols), "-y", str(rows), cmd)

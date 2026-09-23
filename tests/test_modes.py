@@ -1,5 +1,5 @@
 """End-to-end tests for everything that isn't a mission: sandbox, dojo, review, hints,
-show-me, skip, reset, the menu, the outside prompt and the title screen.
+show-me, skip, reset, the menu, the shell outside Herdr and the title screen.
 
     python3 tests/test_modes.py            # all, in parallel
     python3 tests/test_modes.py hints      # just one
@@ -12,6 +12,7 @@ import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from harness import Game  # noqa: E402
+from test_missions import outside  # noqa: E402
 
 
 def seed_progress(home, keys, due=True):
@@ -95,13 +96,13 @@ def t_outside(g):
     g.wait_title("1.1 ")
     g.prefix("q")
     g.wait_screen("outside Herdr")
-    g.type("ls", delay=0.8)
-    g.wait_screen("only herdr commands work")
-    g.type("herdr update", delay=0.8)
-    g.wait_screen("isn't available here")
-    g.type("herdr status", delay=1.5)
+    outside(g, "echo real-$((6*7))")
+    g.wait_screen("real-42")
+    g.type("herdr update", delay=1.0)     # plain commands don't signal a prompt: type straight on
+    g.wait_screen("isn't available while you're playing")
+    outside(g, "herdr status", delay=1.5)
     g.wait_screen("running")
-    g.type("herdr", delay=1.5)
+    outside(g, "herdr", delay=1.5)
     g.wait_hud("1.1 Side by side")
     g.prefix("v")
     g.wait_done("1.1")

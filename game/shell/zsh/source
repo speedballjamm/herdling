@@ -1,0 +1,7 @@
+# Source your own zsh startup file $1 from your real ZDOTDIR (zsh reads ours from here).
+_hl_dir=$ZDOTDIR
+ZDOTDIR=$HERDLING_ZDOTDIR
+[ -f "$ZDOTDIR/$1" ] && . "$ZDOTDIR/$1"
+HERDLING_ZDOTDIR=$ZDOTDIR
+ZDOTDIR=$_hl_dir
+unset _hl_dir

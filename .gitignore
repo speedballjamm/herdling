@@ -1,3 +1,7 @@
 __pycache__/
 *.pyc
 .DS_Store
+
+# zsh history and macOS Terminal sessions, if a shell outside Herdr ever writes them here
+game/shell/zsh/.zsh_history
+game/shell/zsh/.zsh_sessions/

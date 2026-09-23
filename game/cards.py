@@ -233,8 +233,8 @@ you're looking at is just a **client** attached to it. So you can:
 That's why people run agents in Herdr: close the laptop lid, lose the SSH
 connection, and the work carries on. Come back and pick up where it is.
 
-After you detach you'll land on a **practice prompt** that runs real
-herdr commands against the game's Herdr.
+After you detach you'll land in **your own shell**. While the game runs,
+herdr commands there go to the game's Herdr.
 """,
     },
     "detach": {

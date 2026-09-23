@@ -15,8 +15,8 @@ class Step:
     keys: Sequence[str] = ()            # key ids practised (for review)
     done: str = ""
     demo: Sequence = ()                 # what `herdling show` does: key strings or callables
-    outside: str = ""                   # extra help shown at the outside-Herdr prompt
-    detached: bool = False              # the step is done at the outside prompt (nag if still inside)
+    outside: str = ""                   # extra help shown in your shell after a detach
+    detached: bool = False              # the step is done outside Herdr (nag if still inside)
     timeout_hints: bool = True
 
 
@@ -135,7 +135,7 @@ class Ctx:
 
     # --- outside Herdr and the herdling command
     def ran_outside(self, *argv_prefixes):
-        """True if the player ran a command at the outside prompt starting with any of these,
+        """True if the player ran a herdr command outside Herdr starting with any of these,
         e.g. ran_outside(("herdr", "session", "list"))."""
         for e in self.events:
             if e.get("type") == "outside":

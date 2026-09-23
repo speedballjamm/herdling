@@ -22,7 +22,11 @@ class HerdrError(Exception):
 
 
 def herdr_bin():
-    return shutil.which("herdr") or os.path.expanduser("~/.local/bin/herdr")
+    # skip the game's own `herdr` wrapper (bin/outside), which is first on PATH while you're detached
+    wrapper = os.path.join(paths.BIN, "outside")
+    path = os.pathsep.join(d for d in os.environ.get("PATH", "").split(os.pathsep)
+                           if os.path.abspath(d) != wrapper)
+    return shutil.which("herdr", path=path) or os.path.expanduser("~/.local/bin/herdr")
 
 
 def version():

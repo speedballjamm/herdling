@@ -1,0 +1,10 @@
+# bash --rcfile: your own startup files, then herdling's (finish.sh).
+if [ "$(uname)" = Darwin ]; then
+  for _hl in ~/.bash_profile ~/.bash_login ~/.profile; do
+    if [ -f "$_hl" ]; then . "$_hl"; break; fi
+  done
+elif [ -f ~/.bashrc ]; then
+  . ~/.bashrc
+fi
+unset _hl
+. "$HERDLING_SHELL_DIR/finish.sh"

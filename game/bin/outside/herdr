@@ -1,0 +1,4 @@
+#!/bin/sh
+# `herdr` in your shell while you're detached from the game: talks to the game's Herdr.
+ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
+PYTHONPATH="$ROOT" exec "${HERDLING_PYTHON:-python3}" -m game.outside "$@"

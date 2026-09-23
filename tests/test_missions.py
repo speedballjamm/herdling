@@ -377,8 +377,11 @@ def world5(g):
 
 
 def outside(g, text, delay=1.0):
-    """Type a command at the outside-Herdr practice prompt."""
-    g.wait_screen("you@outside", timeout=10)
+    """Type a command into your shell while detached, once it's at a prompt."""
+    ready = os.path.join(g.home, "run", "outside-ready")
+    g.wait(lambda: os.path.exists(ready), 20, "the shell outside Herdr")
+    os.remove(ready)
+    time.sleep(0.3)
     g.type(text, delay=delay)
 
 
