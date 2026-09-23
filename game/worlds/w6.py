@@ -1,4 +1,4 @@
-"""World 6: detach, reattach, and named sessions, practised at a real outside-Herdr prompt."""
+"""World 6: detach, reattach, and named sessions, practised in your own shell outside Herdr."""
 import random
 
 from .. import herdr as herdr_mod
@@ -64,7 +64,7 @@ WORLD = World(6, "Detach & Sessions", card="sessions", missions=[
         Step("Now go back in: type **herdr** at the prompt.",
              goal=lambda c: c.s.attached and c.ran_outside(("herdr",)),
              outside=OUT_BACK,
-             hints=["At the you@outside prompt, type herdr and press Enter."],
+             hints=["In your shell, type herdr and press Enter."],
              keys=["herdr"],
              done="Welcome back. The job kept counting while you were gone."),
     ]),
@@ -73,7 +73,7 @@ WORLD = World(6, "Detach & Sessions", card="sessions", missions=[
              setup=ticking(),
              goal=lambda c: c.ran_outside(("herdr", "session", "list"), ("herdr", "session", "ls")),
              detached=True, outside=OUT_LIST,
-             hints=["`prefix+q` first, then type the command at the outside prompt."],
+             hints=["`prefix+q` first, then type the command in your shell."],
              keys=["session-list"],
              done="'default … running': that's the game's Herdr, still going."),
         Step("Back in with **herdr**.",
@@ -87,7 +87,7 @@ WORLD = World(6, "Detach & Sessions", card="sessions", missions=[
              setup=lambda c: reset(c),
              goal=on_session("work"),
              detached=True, outside="Type:  herdr session attach work      (herdr --session work does the same)",
-             hints=["`prefix+q`, then at the outside prompt: herdr session attach work"],
+             hints=["`prefix+q`, then in your shell: herdr session attach work"],
              keys=["session-attach"],
              done="A brand-new, empty Herdr: its own server, workspaces and panes."),
         Step("This is the **work** session. Detach from it: `prefix+q`",

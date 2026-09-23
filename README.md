@@ -62,8 +62,8 @@ herdling show      watch it done, then try        herdling edit     open your pr
 herdling skip      skip this mission              herdling menu     back to the title screen
 ```
 
-When you detach (`prefix+q`) you land on a practice prompt that runs real Herdr
-commands: `herdr`, `herdr session list`, `herdr session attach work`, and so on.
+When you detach (`prefix+q`) you land in your own shell, where `herdr`, `herdr session list`,
+`herdr session attach work` and so on work on the game's Herdr. Exit that shell to quit to the menu.
 
 ## Safety
 

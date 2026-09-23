@@ -1,0 +1,6 @@
+# The last startup file: give ZDOTDIR back (and HISTFILE, which macOS's /etc/zshrc set
+# from ours), then herdling's finish.sh.
+[ "$HISTFILE" = "$ZDOTDIR/.zsh_history" ] && HISTFILE=$HERDLING_ZDOTDIR/.zsh_history
+ZDOTDIR=$HERDLING_ZDOTDIR
+unset HERDLING_ZDOTDIR
+. "$HERDLING_SHELL_DIR/finish.sh"
