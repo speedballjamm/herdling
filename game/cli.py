@@ -183,7 +183,14 @@ def main(argv):
     if cmd in ("", "menu"):
         launcher.menu()
     elif cmd in ("play", "campaign"):
-        launcher.play("campaign", argv[1] if len(argv) > 1 else None)
+        start = argv[1].strip().rstrip(".") if len(argv) > 1 else None
+        if start:
+            from .worlds import find
+            if not find(start):
+                print(f"There's no mission {argv[1]!r}. Missions look like 2.3 (world 2, mission 3); "
+                      f"`herdling status` lists the worlds.")
+                sys.exit(1)
+        launcher.play("campaign", start)
     elif cmd in ("dojo", "review", "sandbox"):
         launcher.play(cmd)
     else:

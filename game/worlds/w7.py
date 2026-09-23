@@ -22,7 +22,7 @@ def short_code(c):
 def two_panes(c):
     code = rand_code()
     c.mem["code"] = code
-    reset(c, tabs=[("copy", R(P("from", "banner", f"copy-me: {code}"), P("to")))], focus_pane="from")
+    reset(c, tabs=[("copy", R(P("from", "banner", f"copy-me: {code}"), P("to", "inbox", "Paste the code here")))], focus_pane="from")
 
 
 def warnings(c):
@@ -46,7 +46,7 @@ def incident(c):
     decoys = [f"req-{random.randint(10000, 99999)}" for _ in range(3)]
     c.mem["code"], c.mem["decoys"] = first, decoys
     reset(c, tabs=[("incident", R(P("incident", "incident", random.randint(1, 10 ** 6), first, ",".join(decoys), 0.02),
-                                  P("ticket", "banner", "TICKET #4411: paste the FIRST error's request id here"),
+                                  P("ticket", "inbox", "TICKET #4411: paste the FIRST error's request id here"),
                                   ratio=0.62))], focus_pane="incident")
 
 
