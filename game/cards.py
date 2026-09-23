@@ -352,6 +352,9 @@ You've cleared every core mission. You can now:
 Everything you learned works in a normal `herdr`. Run it in a project
 folder and start an agent: `herdr` → `claude` (or codex, pi…).
 The sandbox is yours now; your cheat sheet: `herdling cheat`.
+
+Made by James Moult. If herdling helped, a star or a sponsor keeps
+it going: github.com/sponsors/speedballjamm   (thank you!)
 """,
     },
 }
