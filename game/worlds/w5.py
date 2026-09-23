@@ -122,7 +122,11 @@ WORLD = World(5, "The Herd", card="agents", missions=[
              goal=focused_on("codex"),
              mistakes=[(lambda c: c.just_pressed("open_notification_target") and status(c, "codex") != "blocked"
                         and "codex" not in track(c),
-                        "Nothing needs you yet. Wait for the pop-up, then `prefix+o`.")],
+                        "Nothing needs you yet. Wait for the pop-up, then `prefix+o`."),
+                       (lambda c: c.just_pressed("open_notification_target") and status(c, "codex") == "blocked"
+                        and not focused_on("codex")(c),
+                        "Too slow: `prefix+o` only works while the notice is up. codex will ask again "
+                        "in a few seconds, so be ready.")],
              hints=["Keep an eye on the bottom-right corner and the sidebar's dots.",
                     "When 'codex needs attention' appears: `ctrl+b` then `o`"],
              expect=["open_notification_target"], keys=["open-notif"]),

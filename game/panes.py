@@ -11,6 +11,7 @@
 import json
 import os
 import random
+import select
 import socket
 import sys
 import time
@@ -149,6 +150,22 @@ def work(name, secs, rng):
     print(f"\r  \x1b[38;5;78m✔\x1b[0m {thought}      ", flush=True)
 
 
+NAG_EVERY = 8   # seconds between taps on the shoulder while a question waits
+
+
+def wait_for_answer(name, question):
+    """Read a line, tapping the shoulder again every few seconds. Herdr's notice only shows for
+    a moment and `prefix+o` only works while it's up, so a slow player would otherwise be stuck.
+    Blocked -> unknown -> blocked re-fires the notice without ever looking answered."""
+    while True:
+        ready, _, _ = select.select([sys.stdin], [], [], NAG_EVERY)
+        if ready:
+            return sys.stdin.readline()
+        report("unknown", name)
+        time.sleep(0.3)
+        report("blocked", name, question)
+
+
 def agent(name, script=""):
     """A pretend coding agent. SCRIPT is comma-separated steps:
          idle:N    sit at the prompt for N seconds
@@ -173,7 +190,7 @@ def agent(name, script=""):
                 report("blocked", name, question)
                 print(f"\n  \x1b[1;38;5;222m? {question}\x1b[0m  [y/n] ", end="", flush=True)
                 while True:
-                    ans = sys.stdin.readline()
+                    ans = wait_for_answer(name, question)
                     if not ans:
                         raise EOFError
                     ans = ans.strip().lower()
