@@ -604,7 +604,7 @@ def world10(g):
     srv = next(t for t in g.snap()["tabs"] if t["label"] == "server")
     logs = g.layout_of(srv["tab_id"])["panes"][0]["pane_id"]
     g.wait(lambda: "stream ended" in g.read(logs, lines=400), 60, "incident log")
-    first = next(l for l in g.read(logs, lines=400).splitlines() if " ERROR " in l).split("req=")[1].split()[0]
+    first = next(l for l in g.read(logs, lines=400).splitlines() if " ERROR " in l).split()[2]
     g.prefix("l")
     g.cmd(f"herdling answer {first}")
     step(g, 6, 8)
