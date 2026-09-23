@@ -70,6 +70,7 @@ KEYS = [
     Key("copy-mode", "prefix+[", "Copy mode: scroll the past (q leaves)", 7, "copy_mode", "Copy mode"),
     Key("copy-move", "k j PgUp PgDn", "Move / scroll in copy mode (ctrl+u / ctrl+d half pages)", 7, "",
         "Copy mode"),
+    Key("copy-top", "g G", "Jump to the oldest / newest line in copy mode", 7, "", "Copy mode"),
     Key("copy-search", "/ and ?", "Search forward / back in copy mode (n / N repeat)", 7, "", "Copy mode"),
     Key("copy-select", "v … y", "Select (v or Space), then copy (y or Enter)", 7, "", "Copy mode"),
     Key("drag-copy", "drag to select", "Drag with the mouse to copy, no copy mode needed", 7, "", "Copy mode"),

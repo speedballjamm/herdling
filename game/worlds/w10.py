@@ -48,7 +48,7 @@ def answered_code(c):
         return False
     if a.strip() == c.mem["code"]:
         return True
-    c.say(f"'{a}' isn't the first error's request id. Search up in copy mode: `?` ERROR.")
+    c.say(f"'{a}' isn't the first error's request id. In copy mode, `g` jumps to the top, then `/` ERROR.")
     return False
 
 
@@ -77,7 +77,7 @@ WORLD = World(10, "Final Boss", card="final", missions=[
         Step("Errors in the logs! Find the request id of the **FIRST** ERROR in the **server** tab, "
              "then type **herdling answer req-…** in your shell pane (not the agent's).",
              goal=answered_code,
-             hints=["`prefix+2`, `prefix+[`, then `?` ERROR; `n` goes further up. Answer back in code's "
+             hints=["`prefix+2`, `prefix+[`, `g` to the top, then `/` ERROR. Answer back in code's "
                     "right pane."]),
         Step("Home time. Detach, and leave it all running.",
              goal=lambda c: not c.s.attached,

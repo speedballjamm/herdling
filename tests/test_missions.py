@@ -428,8 +428,8 @@ def world6(g):
     step(g, 2, 3)
     outside(g, "herdr session list")
     step(g, 3, 3)
-    time.sleep(21)
     outside(g, "herdr", delay=1.5)
+    g.wait(lambda: "code word is:" in g.read(g.pane_labelled("job")), 60, "the job to finish")
     text = g.read(g.pane_labelled("job"))
     code = text.split("code word is:")[1].split()[0]
     g.cmd(f"herdling answer {code}")
@@ -439,14 +439,6 @@ def world6(g):
 def secret_in(g, label, marker):
     text = g.read(g.pane_labelled(label), lines=2000)
     return text.split(marker)[1].split()[0]
-
-
-def copy_word(g, word):
-    """Copy mode: search up for `word`, select to the end of the WORD, copy."""
-    g.prefix("[")
-    g.keys("?")
-    g.type(word, delay=0.4)
-    g.keys("v", "E", "y", delay=0.3)
 
 
 def world7(g):
@@ -467,14 +459,23 @@ def world7(g):
     g.wait_done("7.2")
     mission(g, "7.3")
     time.sleep(0.8)
-    code = secret_in(g, "notes", "deploy code is ")
-    copy_word(g, code.split("-")[0])
+    g.prefix("[")
+    g.keys("g")
+    g.keys("/")
+    g.type("WARN", delay=0.4)
+    g.keys("q")
+    text = g.read(g.pane_labelled("disk-log"), lines=400)
+    g.cmd(f"herdling answer {next(l for l in text.splitlines() if ' WARN ' in l).split()[2]}")
     g.wait_done("7.3")
     mission(g, "7.4")
     time.sleep(0.8)
-    code = secret_in(g, "from", "Copy me: ")
-    copy_word(g, code.split("-")[0])
+    code = secret_in(g, "from", "copy-me: ")
+    g.prefix("[")
+    g.keys("?")
+    g.type("copy-me", delay=0.4)
+    g.keys("W", "v", "E", "y", delay=0.3)
     g.wait(lambda: code in g.clipboard(), 10, "the copy to reach the clipboard")
+    step(g, 2, 2)
     g.prefix("l")
     g.paste(g.clipboard())
     g.wait_done("7.4")
@@ -487,8 +488,12 @@ def world7(g):
     mission(g, "7.6")
     g.wait(lambda: "stream ended" in g.read(g.pane_labelled("incident"), lines=400), 60, "incident log")
     text = g.read(g.pane_labelled("incident"), lines=400)
-    first = next(l for l in text.splitlines() if " ERROR " in l).split("req=")[1].split()[0]
-    copy_word(g, first)
+    first = next(l for l in text.splitlines() if " ERROR " in l).split()[2]
+    g.prefix("[")
+    g.keys("g")
+    g.keys("/")
+    g.type("ERROR", delay=0.4)
+    g.keys("W", "v", "E", "y", delay=0.3)
     g.wait(lambda: first in g.clipboard(), 10, "the copy to reach the clipboard")
     g.prefix("l")
     g.paste(g.clipboard())
@@ -599,7 +604,7 @@ def world10(g):
     srv = next(t for t in g.snap()["tabs"] if t["label"] == "server")
     logs = g.layout_of(srv["tab_id"])["panes"][0]["pane_id"]
     g.wait(lambda: "stream ended" in g.read(logs, lines=400), 60, "incident log")
-    first = next(l for l in g.read(logs, lines=400).splitlines() if " ERROR " in l).split("req=")[1].split()[0]
+    first = next(l for l in g.read(logs, lines=400).splitlines() if " ERROR " in l).split()[2]
     g.prefix("l")
     g.cmd(f"herdling answer {first}")
     step(g, 6, 8)

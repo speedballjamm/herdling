@@ -22,7 +22,23 @@ def short_code(c):
 def two_panes(c):
     code = rand_code()
     c.mem["code"] = code
-    reset(c, tabs=[("copy", R(P("from", "banner", f"Copy me: {code}"), P("to")))], focus_pane="from")
+    reset(c, tabs=[("copy", R(P("from", "banner", f"copy-me: {code}"), P("to")))], focus_pane="from")
+
+
+def warnings(c):
+    """A log with a few WARN lines: `?` finds the newest, the lesson is finding the first."""
+    first, decoys = rand_code(), [rand_code() for _ in range(3)]
+    c.mem["code"], c.mem["decoys"] = first, decoys
+    reset(c, tabs=[("logs", P("disk-log", "incident", random.randint(1, 10 ** 6), first, ",".join(decoys), 0,
+                              "WARN"))])
+
+
+def first_warning(c):
+    a = c.answer()
+    if a is not None and any(d in a.upper() for d in c.mem["decoys"]):
+        c.say("That's a WARN, but not the first one. `g` jumps to the top, then `/WARN` searches down.")
+        return False
+    return answered(c, c.mem["code"])
 
 
 def incident(c):
@@ -46,7 +62,7 @@ def ticket_has(c):
         return True
     for d in c.mem.get("decoys", []):
         if d in body:
-            c.say("That's an ERROR, but not the FIRST one. Look further up.")
+            c.say("That's an ERROR, but not the FIRST one. `g` jumps to the top, then `/ERROR` searches down.")
     return False
 
 
@@ -80,30 +96,37 @@ WORLD = World(7, "Copy Mode", card="copy", missions=[
              expect=["copy_mode"], keys=["copy-search"],
              done="Searching beats scrolling. Uppercase letters make the search case-sensitive."),
     ]),
-    Mission("7.3", "Copy that", xp=70, par=90, steps=[
-        Step("Copy the deploy code: `prefix+[`, move onto it, `v` to start selecting, `E` to "
-             "reach the end of the code, `y` to copy.",
-             setup=short_code,
+    Mission("7.3", "First things first", xp=70, par=90, steps=[
+        Step("Several **WARN** lines; you want the **first**. In copy mode, `g` jumps to the top, then "
+             "`/` **WARN** Enter searches down. Answer: **herdling answer CODE**.",
+             setup=warnings,
+             goal=first_warning,
+             hints=["`prefix+[` `g` (the oldest line), then `/` WARN `enter`. `G` jumps back to the newest.",
+                    "`prefix+[` `g` `/` WARN `enter`, read the code after WARN, `q`, herdling answer …"],
+             expect=["copy_mode"], keys=["copy-top"],
+             done="`g` then `/`: the first match. `G` then `?`: the latest one."),
+    ]),
+    Mission("7.4", "Copy that, paste it there", xp=80, par=120, steps=[
+        Step("Copy the code in the left pane. In copy mode: `?` **copy-me** Enter to jump to it, `W` "
+             "to hop onto the code, `v` to start selecting, `E` to reach its end, `y` to copy.",
+             setup=two_panes,
              goal=lambda c: copied_has(c, c.mem["code"]),
-             hints=["In copy mode: k moves up, w jumps a word, 0 goes to the line start. Space also selects, "
+             hints=["`W` moves a whole WORD at a time; `E` goes to the end of one. Space also selects, "
                     "Enter also copies.",
-                    "`prefix+[` `?` then the code's first word, `enter`, `v`, `E`, `y`"],
+                    "`prefix+[` `?` copy-me `enter` `W` `v` `E` `y`"],
              keys=["copy-select"],
              done="Copied to your system clipboard: it pastes anywhere, even outside Herdr."),
-    ]),
-    Mission("7.4", "Paste it over there", xp=60, par=90, steps=[
-        Step("Copy the code in the left pane (any way you like), then click the right pane and "
-             "**paste** it with your terminal's paste (Cmd+V on a Mac, Ctrl+Shift+V on Linux).",
-             setup=two_panes,
+        Step("Now paste it into the right pane: `prefix+l`, then your terminal's paste (Cmd+V on a Mac, "
+             "Ctrl+Shift+V on Linux).",
              goal=lambda c: bool(c.s.pane_labelled("to")) and pane_contains(c, c.s.pane_labelled("to").id,
                                                                             c.mem["code"]),
              hints=["Herdr has no paste key of its own: your terminal's paste goes straight to the focused pane.",
-                    "Copy with `prefix+[` … `y` (or drag over it), `prefix+l`, then Cmd+V"],
+                    "`prefix+l`, then Cmd+V"],
              keys=["paste"],
              done="Copy in Herdr, paste like anywhere else."),
     ]),
     Mission("7.5", "Drag to copy", xp=40, par=40, bonus=True, steps=[
-        Step("Use the mouse: **drag** across the deploy code. It's copied the moment you let go.",
+        Step("The mouse way: **drag** across the deploy code. It's copied the moment you let go.",
              setup=short_code,
              goal=lambda c: c.dragged() and copied_has(c, c.mem["code"]),
              hints=["Press on the first letter of the code, drag to its last digit, let go. "
@@ -112,11 +135,11 @@ WORLD = World(7, "Copy Mode", card="copy", missions=[
              done="No copy mode needed. A small 'copied' notice pops up at the bottom."),
     ]),
     Mission("7.6", "BOSS: Log detective", xp=200, par=180, boss=True, steps=[
-        Step("BOSS! Payments are failing. In the incident log, find the request id (req-…) of the "
-             "**FIRST** ERROR, copy it, and paste it into the **ticket** pane.",
+        Step("BOSS! Payments are failing. In the incident log, find the **FIRST** ERROR, copy its "
+             "request id (req-…), and paste it into the **ticket** pane.",
              setup=incident,
              goal=ticket_has,
-             hints=["Copy mode, then `?` ERROR searches up; `N` goes the other way. Keep going to the first one.",
-                    "Copy the req-12345 with v … y, `prefix+l` to the ticket pane, then paste."]),
+             hints=["Copy mode, `g` to the top, then `/` ERROR searches down to the first one.",
+                    "`W` hops onto the req-…, `v` `E` `y` copies it, `prefix+l` to the ticket pane, then paste."]),
     ]),
 ])

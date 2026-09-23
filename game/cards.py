@@ -274,8 +274,10 @@ Plain `herdr` always means the **default** session.
 the output so you can read, search and copy. (The program keeps running.)
 
   move      `k` `j` (lines)  `ctrl+u` `ctrl+d` (half pages)  PageUp/PageDown
+            `g` the oldest line, `G` the newest
             `w` `b` `e` words, `W` `B` `E` whole WORDS, `{` `}` paragraphs
   search    `?` up (back in time), `/` down, then `n` / `N` repeat
+             the first match: `g` then `/`   the latest: `?`
   select    `v` (or Space) starts, move to the end, `y` (or Enter) copies
   leave     `q` or `esc`
 

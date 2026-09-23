@@ -3,7 +3,7 @@
     label NAME [COLOUR]              a big name tag
     log SEED SECRET [BEFORE] [AFTER] a long log with a secret line buried in it
     search SEED WORD N               a log with N lines containing WORD
-    incident SEED FIRST DECOYS       an incident stream; find the first ERROR
+    incident SEED FIRST DECOYS [DELAY] [LEVEL]  a log stream; find the first ERROR (or WARN…)
     ticker SECS CODE                 counts up, then prints a code word
     banner TEXT                      one line of text
     agent NAME SCRIPT                a pretend coding agent (see `agent` below)
@@ -71,8 +71,15 @@ def search(seed, word, n):
     sys.stdout.flush()
 
 
-def incident(seed, first_id, decoys, delay=0.02):
+INCIDENT_LINES = {    # level -> (first line, later ones): the id comes straight after the level,
+    "ERROR": ("[billing] charge failed: upstream timeout", "[billing] retry failed"),  # so `W` reaches it
+    "WARN": ("[disk] /var is 91% full", "[disk] /var is still filling up"),
+}
+
+
+def incident(seed, first_id, decoys, delay=0.02, level="ERROR"):
     rng = random.Random(seed)
+    first_msg, later_msg = INCIDENT_LINES[level]
     decoys = [d for d in decoys.split(",") if d]
     delay = float(delay)
     first_at = rng.randint(50, 80)
@@ -80,14 +87,15 @@ def incident(seed, first_id, decoys, delay=0.02):
     print("=== incident stream: payments-api (prod) ===")
     for i in range(260):
         if i == first_at:
-            line = f"{i:05d} ERROR [billing] charge failed: upstream timeout req={first_id}"
+            line = f"{i:05d} {level:<5} {first_id} {first_msg}"
         elif i in later:
-            line = f"{i:05d} ERROR [billing] retry failed req={decoys[later.index(i)]}"
+            line = f"{i:05d} {level:<5} {decoys[later.index(i)]} {later_msg}"
         else:
-            line = f"{i:05d} " + fake_line(rng, i)[9:]
+            line = f"{i:05d} " + fake_line(rng, i)[9:].replace(f"{level:<5} [", "INFO  [")   # only ours match
         print(line, flush=True)
-        time.sleep(delay)
-    print("=== stream ended: find the FIRST error ===", flush=True)
+        if delay:
+            time.sleep(delay)
+    print(f"=== stream ended: find the FIRST {level} ===", flush=True)
 
 
 def ticker(secs, code):
