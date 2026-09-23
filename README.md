@@ -1,5 +1,6 @@
 # herdling
 
+[![tests](https://github.com/speedballjamm/herdling/actions/workflows/tests.yml/badge.svg)](https://github.com/speedballjamm/herdling/actions/workflows/tests.yml)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 Learn [Herdr](https://herdr.dev) by playing it. No prior knowledge needed.
