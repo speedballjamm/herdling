@@ -1,12 +1,13 @@
-# Plays every mission against the latest Herdr, weekly and on demand (Actions → herdr-compat →
-# Run workflow, e.g. right after a Herdr release). Opens an issue when something breaks.
+# Plays every mission against the latest Herdr: weekly, on demand (Actions → herdr-compat →
+# Run workflow, e.g. right after a Herdr release), and on PRs that touch the game or its tests.
+# Opens an issue when a scheduled run breaks.
 name: herdr-compat
 on:
   schedule:
     - cron: "0 6 * * 1"   # Mondays 06:00 UTC
   workflow_dispatch:
   pull_request:
-    paths: [.github/workflows/herdr-compat.yml, tests/**]
+    paths: [.github/workflows/herdr-compat.yml, tests/**, game/**, herdling]
 permissions:
   contents: read
   issues: write
