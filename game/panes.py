@@ -6,6 +6,7 @@
     incident SEED FIRST DECOYS [DELAY] [LEVEL]  a log stream; find the first ERROR (or WARN…)
     ticker SECS CODE                 counts up, then prints a code word
     banner TEXT                      one line of text
+    inbox TEXT                       a heading, then takes whatever you paste or type
     agent NAME SCRIPT                a pretend coding agent (see `agent` below)
 """
 import json
@@ -110,6 +111,19 @@ def banner(text):
     print()
     print(f"   {text}")
     print()
+
+
+def inbox(text):
+    """Somewhere to paste: it files each line instead of running it (a shell would say
+    'command not found')."""
+    print(f"\n   \x1b[1m{text}\x1b[0m\n")
+    while True:
+        print("  \x1b[38;5;244mpaste here >\x1b[0m ", end="", flush=True)
+        line = sys.stdin.readline()
+        if not line:
+            break
+        if line.strip():
+            print(f"  \x1b[38;5;78m✔ filed:\x1b[0m {line.strip()}")
 
 
 # ------------------------------------------------------------------ the pretend agent
@@ -232,7 +246,7 @@ def main(argv):
         return
     cmd, args = argv[0], argv[1:]
     {"label": label, "log": log, "search": search, "incident": incident, "ticker": ticker,
-     "banner": banner, "agent": agent}[cmd](*args)
+     "banner": banner, "inbox": inbox, "agent": agent}[cmd](*args)
 
 
 if __name__ == "__main__":
