@@ -21,7 +21,7 @@ TAG="$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" \
   | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p' | head -n 1)"
 [ -n "$TAG" ] || die "couldn't find the latest release"
 
-say "Installing herdling $TAG…"
+say "Installing herdling ${TAG}..."
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 curl -fsSL "https://github.com/$REPO/archive/refs/tags/$TAG.tar.gz" | tar -xz -C "$TMP"
