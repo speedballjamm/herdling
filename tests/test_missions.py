@@ -478,6 +478,8 @@ def world7(g):
     step(g, 2, 2)
     g.prefix("l")
     g.paste(g.clipboard())
+    g.keys("Enter")
+    assert_filed(g, "to", code)
     g.wait_done("7.4")
     mission(g, "7.5")
     time.sleep(0.8)
@@ -497,7 +499,16 @@ def world7(g):
     g.wait(lambda: first in g.clipboard(), 10, "the copy to reach the clipboard")
     g.prefix("l")
     g.paste(g.clipboard())
+    g.keys("Enter")
+    assert_filed(g, "ticket", first)
     g.wait_done("7.6")
+
+
+def assert_filed(g, label, code):
+    """The paste landed in an inbox, not a shell (which says "command not found")."""
+    pane = g.pane_labelled(label)
+    g.wait(lambda: f"filed: {code}" in g.read(pane, lines=50), 5, f"the {label} pane to file {code}")
+    assert "not found" not in g.read(pane, lines=50), f"[{g.name}] {label} pane ran the paste as a command"
 
 
 def world8(g):
@@ -626,15 +637,18 @@ START = {n: f"{n}.1" for n in WORLDS}
 def run_world(n):
     args = ("play",) if n == 0 else ("play", START[n])
     g = Game(f"w{n}", args=args, clipboard=(n == 7))
+    ok = False
     try:
         WORLDS[n](g)
         print(f"world {n}: OK")
-        return True
+        ok = True
     except AssertionError as e:
         print(f"world {n}: FAILED\n{e}")
-        return False
     finally:
+        if not ok:
+            g.save_evidence()
         g.close()
+    return ok
 
 
 def main(argv):

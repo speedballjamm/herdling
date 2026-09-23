@@ -1,0 +1,6 @@
+# Pyflakes (undefined names, unused imports) and syntax errors only. Bugbear's loop-closure
+# warnings (B023) are all false positives here: the closures run in the same iteration.
+target-version = "py39"
+
+[lint]
+select = ["E9", "F"]

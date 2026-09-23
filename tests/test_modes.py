@@ -199,18 +199,21 @@ def run(name):
         home = tempfile.mkdtemp(prefix="hl-review-", dir="/tmp")
         seed_progress(home, ["split-right", "split-down"])
     g = Game(f"m-{name}", args=args, env=env, home=home)
+    ok = False
     try:
         fn(g)
         print(f"{name}: OK")
-        return True
+        ok = True
     except AssertionError as e:
         print(f"{name}: FAILED\n{e}")
-        return False
     finally:
+        if not ok:
+            g.save_evidence()
         g.close()
         if home:
             import shutil
             shutil.rmtree(home, ignore_errors=True)
+    return ok
 
 
 def main(argv):

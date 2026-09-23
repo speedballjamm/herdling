@@ -37,7 +37,8 @@ class Game:
         self.run_outer("kill-server")
         self.real_conf = os.path.join(self.home, "real-config.toml")
         # a plain shell with no history file, so test runs stay out of your own shell history
-        env = {"HERDLING_SHELL": "/bin/sh", "HISTFILE": "/dev/null", **(env or {})}
+        env = {"HERDLING_SHELL": "/bin/sh", "HISTFILE": "/dev/null",
+               "HERDLING_PROXY_DEBUG": os.path.join(self.home, "proxy-debug.log"), **(env or {})}
         extra = " ".join(f"{k}={v}" for k, v in env.items())
         cmd = (f"env -u TMUX -u HERDR_ENV HERDLING_HOME={self.home} HERDLING_REAL_CONF={self.real_conf} {extra} "
                f"{ROOT}/herdling {' '.join(args)}; sleep 30")
@@ -221,6 +222,21 @@ class Game:
         self.wait_screen("Enter to continue", timeout)
         time.sleep(0.2)
         self.keys("Enter", delay=0.6)
+
+    def save_evidence(self):
+        """Copy what a failed game left behind (screen, title, engine log, progress) into
+        $HERDLING_TEST_ARTIFACTS/<name>/, which CI uploads. Does nothing if that's unset."""
+        out = os.environ.get("HERDLING_TEST_ARTIFACTS")
+        if not out:
+            return
+        out = os.path.join(out, self.name)
+        os.makedirs(out, exist_ok=True)
+        with open(os.path.join(out, "screen.txt"), "w") as f:
+            f.write(f"TITLE: {self.title()}\n\n{self.screen()}")
+        for rel in ("engine.log", "progress.json", "run/runtime.json", "run/events.jsonl", "proxy-debug.log"):
+            src = os.path.join(self.home, rel)
+            if os.path.exists(src):
+                shutil.copy(src, os.path.join(out, rel.replace("/", "-")))
 
     def close(self):
         try:
