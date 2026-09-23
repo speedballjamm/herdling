@@ -22,9 +22,23 @@ def ticking(secs=3600, code="-"):
     return setup
 
 
+BOSS_JOB = 45   # seconds: long enough to detach and look around before it finishes
+
+
 def boss_setup(c):
     c.mem["code"] = random.choice(WORDS)
-    ticking(20, c.mem["code"])(c)
+    ticking(BOSS_JOB, c.mem["code"])(c)
+
+
+def detached_before_done(c):
+    """Detached while the job still runs. If it finished while you watched, start a new one."""
+    if not c.s.attached:
+        return True
+    p = c.s.pane_labelled("job")
+    if p and "code word is" in c.read(p.id):
+        boss_setup(c)
+        c.say("It finished while you watched! Here's a fresh job: detach before it's done.")
+    return False
 
 
 def session_gone(name):
@@ -118,16 +132,19 @@ WORLD = World(6, "Detach & Sessions", card="sessions", missions=[
         Step("Back in: **herdr**", goal=lambda c: c.s.attached, outside=OUT_BACK, hints=["herdr"]),
     ]),
     Mission("6.5", "BOSS: Survive the disconnect", xp=150, par=150, boss=True, steps=[
-        Step("BOSS! A 20-second job just started. Detach **now**, so you're not watching it.",
+        Step(f"BOSS! A {BOSS_JOB}-second job just started in this pane. Detach (`prefix+q`) before it "
+             "finishes, and let it carry on without you.",
              setup=boss_setup,
-             goal=detached,
-             hints=["`prefix+q`"]),
-        Step("Prove it's still running: **herdr session list**",
+             goal=detached_before_done,
+             hints=["`prefix+q`"],
+             done="Out. The job is still counting in there."),
+        Step("From out here, check Herdr is still running: **herdr session list**",
              goal=lambda c: c.ran_outside(("herdr", "session", "list"), ("herdr", "session", "ls")),
              detached=True, outside=OUT_LIST,
-             hints=["herdr session list"]),
-        Step("Wait a bit, then go back in and read the code word the job printed. "
-             "Type **herdling answer WORD** in a pane.",
+             hints=["herdr session list"],
+             done="'default … running': the server, and the job inside it, carried on without you."),
+        Step("Go back in (**herdr**). When the job finishes it prints a code word: "
+             "type **herdling answer WORD** in the job pane.",
              goal=lambda c: answered(c, c.mem["code"]),
              outside=OUT_BACK,
              hints=["herdr, then look at the job pane. If it's still counting, wait for it.",
