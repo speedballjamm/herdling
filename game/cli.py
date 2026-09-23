@@ -136,6 +136,13 @@ def edit_config():
     os.execvp("sh", ["sh", "-c", f'{editor} "$1"', "sh", paths.CONFIG])
 
 
+def mission_id(arg):
+    """The mission `arg` names ("7.3." and " 7.3 " mean 7.3), or None if there's no such mission."""
+    from .worlds import find
+    mid = arg.strip().rstrip(".")
+    return mid if find(mid) else None
+
+
 def main(argv):
     cmd = argv[0] if argv else ""
     if cmd in ("-h", "--help", "help"):
@@ -183,10 +190,10 @@ def main(argv):
     if cmd in ("", "menu"):
         launcher.menu()
     elif cmd in ("play", "campaign"):
-        start = argv[1].strip().rstrip(".") if len(argv) > 1 else None
-        if start:
-            from .worlds import find
-            if not find(start):
+        start = None
+        if len(argv) > 1 and argv[1].strip():
+            start = mission_id(argv[1])
+            if not start:
                 print(f"There's no mission {argv[1]!r}. Missions look like 2.3 (world 2, mission 3); "
                       f"`herdling status` lists the worlds.")
                 sys.exit(1)

@@ -3,14 +3,19 @@
     python3 -m unittest tests/test_units.py
 """
 import os
+import re
+import subprocess
 import sys
+import tempfile
 import unittest
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT)
 
-from game import actions, conf, hud, markup, state  # noqa: E402
+from game import __version__, actions, conf, hud, markup, state  # noqa: E402
 from game.card import CardView  # noqa: E402
 from game.cards import CARDS  # noqa: E402
+from game.cli import mission_id  # noqa: E402
 from game.engine import key_bytes  # noqa: E402
 from game.keyin import Decoder, KeyTracker, normalise  # noqa: E402
 from game.keys import BY_ID  # noqa: E402
@@ -223,6 +228,41 @@ class ContentTest(unittest.TestCase):
         self.assertEqual(key_bytes("shift+l"), b"L")
         self.assertEqual(key_bytes("minus"), b"-")
         self.assertEqual(key_bytes("prefix", "ctrl+a"), b"\x01")
+
+
+class CliTest(unittest.TestCase):
+    def test_mission_id(self):
+        self.assertEqual(mission_id("7.3"), "7.3")
+        self.assertEqual(mission_id("7.3."), "7.3")      # used to start at 0.1
+        self.assertEqual(mission_id(" 2.3 "), "2.3")
+        self.assertIsNone(mission_id("9.99"))
+        self.assertIsNone(mission_id("banana"))
+
+    def test_unknown_mission_is_refused(self):
+        with tempfile.TemporaryDirectory() as home:
+            r = subprocess.run([sys.executable, os.path.join(ROOT, "herdling"), "play", "9.99"],
+                               env={**{k: v for k, v in os.environ.items() if k != "HERDLING_GAME"}, "HERDLING_HOME": home}, capture_output=True, text=True,
+                               timeout=10)
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("There's no mission", r.stdout)
+
+
+class PanesTest(unittest.TestCase):
+    def test_inbox_files_what_you_paste(self):
+        # 7.4 and 7.6 paste into an inbox; a shell there said "command not found"
+        r = subprocess.run([sys.executable, "-m", "game.panes", "inbox", "Paste here"], cwd=ROOT,
+                           input="req-12345\n\n", capture_output=True, text=True, timeout=10)
+        self.assertIn("Paste here", r.stdout)
+        self.assertIn("filed:\x1b[0m req-12345", r.stdout)
+        self.assertEqual(r.stdout.count("filed:"), 1)     # blank lines aren't filed
+
+
+class ReleaseTest(unittest.TestCase):
+    def test_formula_matches_version(self):
+        with open(os.path.join(ROOT, "packaging", "herdling.rb")) as f:
+            url = re.search(r'url "([^"]+)"', f.read()).group(1)
+        self.assertTrue(url.endswith(f"/v{__version__}.tar.gz"),
+                        f"packaging/herdling.rb points at {url}, but game/__init__.py says {__version__}")
 
 
 if __name__ == "__main__":
