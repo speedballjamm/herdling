@@ -17,11 +17,13 @@ python3 -c 'import sys; sys.exit(sys.version_info < (3, 9))' || die "needs Pytho
 command -v curl >/dev/null 2>&1 || die "needs curl"
 command -v tar >/dev/null 2>&1 || die "needs tar"
 
-TAG="$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" \
-  | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p' | head -n 1)"
+# github.com/…/releases/latest redirects to …/tag/vX.Y.Z (no API rate limit, unlike api.github.com)
+LATEST="$(curl -fsSLI -o /dev/null -w '%{url_effective}' "https://github.com/$REPO/releases/latest")" || LATEST=""
+TAG="${LATEST##*/tag/}"
+case "$LATEST" in */tag/*) ;; *) TAG="" ;; esac
 [ -n "$TAG" ] || die "couldn't find the latest release"
 
-say "Installing herdling $TAG…"
+say "Installing herdling ${TAG}..."
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 curl -fsSL "https://github.com/$REPO/archive/refs/tags/$TAG.tar.gz" | tar -xz -C "$TMP"

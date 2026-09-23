@@ -16,3 +16,12 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - run: python3 -m unittest tests/test_units.py
+  installer:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - run: HERDLING_DIR="$RUNNER_TEMP/share/herdling" HERDLING_BIN="$RUNNER_TEMP/bin" sh install.sh
+      - run: '"$RUNNER_TEMP/bin/herdling" --version'
