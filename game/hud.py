@@ -2,6 +2,7 @@
 
     ▶ 1.2 Stacked │ Split this pane top / bottom:  prefix+minus        ← mission
       (continuation when the prompt doesn't fit)                     ← mission, line 2
+                                                     (or a long message's first half)
     MODE ✔ feedback / hints                      Lost Lamb · 340 XP   ← messages
 
 Herdr is told the terminal is three rows shorter, so it never draws here.
@@ -72,12 +73,20 @@ class Hud:
         if mode in MODE_NAMES:
             badge = f"{BADGE} {MODE_NAMES[mode]} {B}"
         style = MSG.get(kind, B)
-        body = f"{style} {ICONS.get(kind, '')}{markup.to_ansi(msg, style)} {B}" if msg else ""
+        icon = ICONS.get(kind, "")
+        body = f"{style} {icon}{markup.to_ansi(msg, style)} {B}" if msg else ""
         right_s = markup.to_ansi(right, B) + " " if right else ""
         left = B + badge + body
         room = cols - markup.width(right_s)
+        if msg and not rest and markup.width(left) > room - 1:
+            # A long message borrows the mission's empty second row rather than being cut off.
+            lead = markup.width(badge) + 1 + markup.width(icon)
+            top, more = markup.wrap(msg, max(20, cols - lead - 1))
+            if more:
+                l2 = f"{B}{badge}{style} {icon}{markup.to_ansi(top, style)} {B}"
+                left = f"{B}{style}{' ' * lead}{markup.to_ansi(more, style)} {B}"
         if markup.width(left) > room - 1:
-            left = markup.fit(left, max(0, room - 1)) + B
+            left = markup.fit(left, max(0, room - 2)) + "…" + B
         l3 = left + B + " " * max(0, room - markup.width(left)) + right_s
         return [markup.fit(l1, cols) + markup.RESET, markup.fit(l2, cols) + markup.RESET,
                 markup.fit(l3, cols) + markup.RESET]
