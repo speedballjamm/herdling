@@ -1,4 +1,4 @@
 """herdling: learn Herdr by playing it."""
-__version__ = "0.1.4"
+__version__ = "0.1.5"
 URL = "https://github.com/speedballjamm/herdling"
 SPONSOR = "https://github.com/sponsors/speedballjamm"

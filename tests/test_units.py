@@ -197,6 +197,20 @@ class HudTest(unittest.TestCase):
             for line in h.lines(cols):
                 self.assertEqual(markup.width(line), cols)
 
+    def test_long_message_wraps_onto_free_row(self):
+        h = hud.Hud()
+        hint = "herdr pane list to get the vault's id, then herdr pane read <id> --source recent. " * 2
+        h.set(title="8.4 Read it back", prompt="short task", right="Herdling · 120 XP", msg=hint, kind="hint")
+        lines = [markup.plain(markup.ANSI.sub("", ln)) for ln in h.lines(100)]
+        self.assertTrue(all(markup.width(ln) == 100 for ln in h.lines(100)))
+        self.assertIn("herdr pane list", lines[1])
+        self.assertIn("--source recent.", lines[2])
+        self.assertNotIn("…", lines[2])
+        # When the prompt needs row 2 the message keeps one row, and says it was cut.
+        h.set(prompt="a much longer task " * 10)
+        lines = [markup.ANSI.sub("", ln) for ln in h.lines(100)]
+        self.assertIn("…", lines[2])
+
     def test_wrap_never_splits_chips(self):
         first, rest = markup.wrap("press `prefix+shift+n` then `prefix+shift+w` please", 20)
         self.assertEqual(first.count("`") % 2, 0)
