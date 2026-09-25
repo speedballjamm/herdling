@@ -84,8 +84,8 @@ WORLD = World(8, "The Command Line", card="cli", missions=[
              done="Your typing never left this pane. That's how agents drive test runners and servers."),
     ]),
     Mission("8.4", "Read it back", xp=60, par=90, steps=[
-        Step("The **vault** pane printed a code. Read it from here: **herdr pane read ID** and hit Enter, "
-             "then run **herdling answer CODE**.",
+        Step("The **vault** pane printed a code. Find its id with **herdr pane list**, read it with "
+             "**herdr pane read ID**, then send it: **herdling answer CODE**. Hit Enter after each.",
              setup=with_secret,
              goal=lambda c: answered(c, c.mem["code"]),
              hints=["herdr pane list to get the vault's id, then herdr pane read <id>.",
